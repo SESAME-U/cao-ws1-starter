@@ -1,0 +1,17 @@
+---
+# Workshop 1: variables shared by both tiers.
+#
+# The two roles must not know each other. This file wires them together:
+# the web tier connects with the database, user and password that the
+# db tier creates. Typical content (names are up to you, the handout
+# suggests a convention):
+#
+#   - the database name and user, given to both roles
+#   - the database password, given to both roles, from vault_db_password
+#   - the database host for WordPress: the internal_address of the first
+#     host of the group db, through hostvars and groups
+#   - the WordPress admin password, from vault_wp_admin_password
+#   - the secret seed for keys and salts, from vault_wp_secret_seed
+#
+# The values of the three vault_ variables live in vault.yml in this folder,
+# created with ansible-vault. Never write them here.

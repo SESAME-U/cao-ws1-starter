@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+# MariaDB listens on 127.0.0.1 only by default. The web server is another
+# machine, so MariaDB must listen on the private network too.
+[mysqld]
+bind-address = 0.0.0.0    # TODO: a variable of the mariadb role

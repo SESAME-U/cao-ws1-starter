@@ -1,0 +1,105 @@
+name: Autograding
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible, ansible-lint and the collections
+        run: |
+          pip install ansible-core ansible-lint pyyaml
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Start two test servers (containers)
+        run: bash tests/ci-targets.sh
+
+      - name: Structure
+        id: structure
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "Two roles, mariadb and wordpress, used by site.yml"
+          command: python tests/check_structure.py
+          timeout: 5
+          max-score: 2
+
+      - name: Lint
+        id: lint
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "ansible-lint passes (moderate profile)"
+          command: ansible-lint -q --project-dir . -c tests/ansible-lint.yml playbooks/site.yml roles/
+          timeout: 5
+          max-score: 2
+
+      - name: Converge
+        id: converge
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "WordPress and WooCommerce on web1, database on db1"
+          command: bash tests/check_playbook.sh converge
+          timeout: 20
+          max-score: 4
+
+      - name: Idempotent
+        id: idempotent
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "Second run reports changed=0"
+          command: bash tests/check_playbook.sh idempotent
+          timeout: 15
+          max-score: 3
+
+      - name: Handlers
+        id: handlers
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "Hand edits reverted, handlers run"
+          command: bash tests/check_playbook.sh handlers
+          timeout: 15
+          max-score: 1
+
+      - name: Vault
+        id: vault
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "Secrets encrypted, hidden and delivered safely"
+          command: bash tests/check_playbook.sh vault
+          timeout: 5
+          max-score: 2
+
+      - name: Submission answered
+        id: submission
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "SUBMISSION.md complete"
+          command: bash scripts/check-submission.sh
+          timeout: 5
+          max-score: 2
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          STRUCTURE_RESULTS: "${{ steps.structure.outputs.result }}"
+          LINT_RESULTS: "${{ steps.lint.outputs.result }}"
+          CONVERGE_RESULTS: "${{ steps.converge.outputs.result }}"
+          IDEMPOTENT_RESULTS: "${{ steps.idempotent.outputs.result }}"
+          HANDLERS_RESULTS: "${{ steps.handlers.outputs.result }}"
+          VAULT_RESULTS: "${{ steps.vault.outputs.result }}"
+          SUBMISSION_RESULTS: "${{ steps.submission.outputs.result }}"
+        with:
+          runners: structure,lint,converge,idempotent,handlers,vault,submission

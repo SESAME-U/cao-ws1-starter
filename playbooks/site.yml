@@ -1,0 +1,8 @@
+---
+# Workshop 1: two plays, one per tier.
+#
+#   1. hosts: db   -> role mariadb   (MariaDB, the database, the user)
+#   2. hosts: web  -> role wordpress (nginx, PHP, WordPress, WooCommerce)
+#
+# The database play comes first: WordPress needs it to install.
+# Both plays need become: true.

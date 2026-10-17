@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+server {
+    listen 80 default_server;
+    server_name _;
+    root /var/www/wordpress;                          # TODO: a variable
+    index index.php;
+    client_max_body_size 16m;
+    server_tokens off;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;   # TODO: the PHP version as a variable
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}

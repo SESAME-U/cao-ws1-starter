@@ -1,0 +1,10 @@
+---
+# Configuration used by the autograder. Editing it does not change your grade:
+# the instructor's copy is used when grading.
+profile: moderate
+offline: true
+exclude_paths:
+  - .github/
+  - tests/
+  - targets/
+  - inventory/ci.ini

@@ -1,0 +1,26 @@
+<?php
+// {{ ansible_managed }}
+// TODO: replace the four TODO values with variables. The password and the
+// secret seed must come from Ansible Vault, never be written here.
+define( 'DB_NAME',     'TODO' );
+define( 'DB_USER',     'TODO' );
+define( 'DB_PASSWORD', 'TODO' );
+define( 'DB_HOST',     'TODO' );   // the db host's internal_address
+define( 'DB_CHARSET',  'utf8mb4' );
+define( 'DB_COLLATE',  '' );
+
+// Keys and salts: derived from one secret, so they stay the same from one run
+// to the next (idempotent) and never appear in Git.
+{% for key in ['AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY', 'NONCE_KEY',
+               'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT', 'NONCE_SALT'] %}
+define( '{{ key }}', '{{ ("TODO-secret-seed" ~ key) | hash('sha256') }}' );
+{% endfor %}
+
+$table_prefix = 'wp_';
+define( 'WP_DEBUG', false );
+define( 'FS_METHOD', 'direct' );
+
+if ( ! defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', __DIR__ . '/' );
+}
+require_once ABSPATH . 'wp-settings.php';
