@@ -19,7 +19,9 @@ echo "==> Installing the collections of requirements.yml"
 ansible-galaxy collection install -r requirements.yml >/dev/null || echo "    failed: run  make collections  later"
 
 echo "==> Installing lab test tools (pytest, PyYAML, yamllint)"
-python3 -m pip install --user --quiet pytest pyyaml yamllint
+TOOLS_VENV="$HOME/.local/share/cao-ws1/venv"
+python3 -m venv "$TOOLS_VENV"
+"$TOOLS_VENV/bin/python" -m pip install --quiet pytest pyyaml yamllint
 
 echo "==> Creating your lab SSH key (~/.ssh/cao_lab) if missing"
 [[ -f "$HOME/.ssh/cao_lab" ]] || ssh-keygen -q -t ed25519 -N "" -f "$HOME/.ssh/cao_lab" -C "cao-lab"
