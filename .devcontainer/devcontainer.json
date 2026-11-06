@@ -2,12 +2,13 @@
   // Cloud Automation and Orchestration - SESAME University
   // Shared toolbox used for the whole semester.
   //
-  // Keep the base image small; the tools needed for the workshop are
-  // installed by the features below.
+  // Use a smaller Ubuntu base to avoid exhausting disk space during image setup.
   "name": "CAO toolbox",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
   "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "latest",
       "tflint": "latest"
