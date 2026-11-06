@@ -57,7 +57,7 @@ case "$mode" in
     head -1 "$vf" | grep -q '^\$ANSIBLE_VAULT;' || { echo "$vf is not encrypted"; exit 1; }
     plain=$(ansible-vault view "$vf") || { echo "cannot decrypt $vf with the workshop vault password"; exit 1; }
     for v in vault_db_password vault_wp_admin_password vault_wp_secret_seed; do
-      val=$(python3 -c "import yaml,sys; print((yaml.safe_load(sys.stdin) or {}).get('$v') or '')" <<<"$plain")
+      val=$("${LAB_PYTHON:-python3}" -c "import yaml,sys; print((yaml.safe_load(sys.stdin) or {}).get('$v') or '')" <<<"$plain")
       [[ ${#val} -ge 12 ]] || { echo "$vf must define $v (at least 12 characters)"; exit 1; }
       if grep -rqF --exclude=vault.yml -- "$val" inventory playbooks roles; then
         echo "The value of $v appears in clear text outside vault.yml."; exit 1
@@ -65,7 +65,7 @@ case "$mode" in
     done
     grep -rq 'no_log: true' roles/mariadb/tasks || { echo "roles/mariadb: the task that sets the DB password needs no_log: true"; exit 1; }
     grep -rq 'no_log: true' roles/wordpress/tasks || { echo "roles/wordpress: tasks that handle passwords need no_log: true"; exit 1; }
-    dbpw=$(python3 -c "import yaml,sys; print(yaml.safe_load(sys.stdin)['vault_db_password'])" <<<"$plain")
+    dbpw=$("${LAB_PYTHON:-python3}" -c "import yaml,sys; print(yaml.safe_load(sys.stdin)['vault_db_password'])" <<<"$plain")
     docker exec web1 grep -qF "'$dbpw'" /var/www/wordpress/wp-config.php \
       || { echo "web1: wp-config.php does not contain the vault database password"; exit 1; }
     m=$(docker exec web1 stat -c '%a %U' /var/www/wordpress/wp-config.php)
