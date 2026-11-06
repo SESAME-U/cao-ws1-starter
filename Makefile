@@ -1,6 +1,7 @@
 .PHONY: help check azure-up azure-down local-up local-down ping collections vault-pass lint run test clean
 
 VAULT_PASS_FILE ?= $(HOME)/.cao_ws1_vault_pass
+LAB_PYTHON ?= $(if $(wildcard $(HOME)/.local/share/cao-ws1/venv/bin/python),$(HOME)/.local/share/cao-ws1/venv/bin/python,python3)
 
 help:
 	@echo "make check          verify the toolbox"
@@ -49,13 +50,13 @@ run:
 # Same checks as the autograder, on fresh local containers (needs Docker).
 # Note: this replaces the web1 and db1 containers of the local path.
 test:
-	@python3 tests/check_structure.py
+	@$(LAB_PYTHON) tests/check_structure.py
 	@ansible-lint -q --project-dir . -c tests/ansible-lint.yml playbooks/site.yml roles/ && echo "OK: ansible-lint"
 	@bash tests/ci-targets.sh
-	@bash tests/check_playbook.sh converge
-	@bash tests/check_playbook.sh idempotent
-	@bash tests/check_playbook.sh handlers
-	@bash tests/check_playbook.sh vault
+	@LAB_PYTHON="$(LAB_PYTHON)" bash tests/check_playbook.sh converge
+	@LAB_PYTHON="$(LAB_PYTHON)" bash tests/check_playbook.sh idempotent
+	@LAB_PYTHON="$(LAB_PYTHON)" bash tests/check_playbook.sh handlers
+	@LAB_PYTHON="$(LAB_PYTHON)" bash tests/check_playbook.sh vault
 	@$(MAKE) --no-print-directory clean
 
 clean:
