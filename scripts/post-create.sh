@@ -5,9 +5,9 @@ set -euo pipefail
 
 echo "==> Installing Ansible (user scope, via pipx)"
 if ! command -v ansible >/dev/null 2>&1; then
-  python3 -m pip install --user --quiet pipx
-  python3 -m pipx ensurepath >/dev/null
-  python3 -m pipx install --include-deps ansible >/dev/null
+  command -v pipx >/dev/null 2>&1 || sudo apt-get install -y -qq pipx
+  pipx ensurepath >/dev/null
+  pipx install --include-deps ansible >/dev/null
 else
   echo "    already installed, skipping"
 fi
